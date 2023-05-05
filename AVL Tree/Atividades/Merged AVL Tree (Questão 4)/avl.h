@@ -1,6 +1,7 @@
 #ifndef AVL_H
 #define AVL_H
 #include <string>
+#include <vector>
 #include "node.h"
 
 class avl_tree {
@@ -12,6 +13,8 @@ public:
     void bshow() const;
     void clear();
     ~avl_tree();
+    avl_tree* mergeTrees(avl_tree &av1, avl_tree &av2);
+    Node* getRoot() const { return root; }
     
 private:
     Node *root {nullptr};
@@ -24,6 +27,7 @@ private:
     Node* fixup_node(Node *p, int key);
     void bshow(Node *node, std::string heranca) const;
     Node* clear(Node *node);
+    void inorder(Node* node, std::vector<int>& keys);
 };
 
 #endif

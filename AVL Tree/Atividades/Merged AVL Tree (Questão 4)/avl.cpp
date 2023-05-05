@@ -86,6 +86,62 @@ Node* avl_tree::fixup_node(Node *p, int key) {
     return p;
 }
 
+// Processa a árvore em ordem simétrica
+void avl_tree::inorder(Node* node, vector<int>& keys) {
+    if(node != nullptr) { // Caso geral: arvore nao vazia
+        inorder(node->left, keys);
+        keys.push_back(node->key);
+        inorder(node->right, keys);
+    }
+}
+
+// Ordena um vetor com base em outros dois
+vector<int> vectorOrdenado(vector<int>& keys1, vector<int>& keys2) {
+
+    vector<int> keys;
+
+    int i = 0, j = 0;
+    while (i < keys1.size() && j < keys2.size()) {
+        if (keys1[i] < keys2[j]) { keys.push_back(keys1[i]); i++; }
+        else { keys.push_back(keys2[j]); j++; }
+    }
+
+    // Insere as chaves restantes da primeira árvore
+    while (i < keys1.size()) { keys.push_back(keys1[i]); i++; }
+
+    // Insere as chaves restantes da segunda árvore
+    while (j < keys2.size()) { keys.push_back(keys2[j]); j++; }
+
+    return keys;
+}
+
+// constroi a árvore
+void construir(avl_tree *t, vector<int>& keys, int p, int q) {
+	if (p > q) { return; } // Se não houver mais elementos no vetor, retorna e encerra a função
+	int indiceMedio = (p + q) / 2; // Para que a árvore seja balanceada, o índice médio deve ser o nó raiz
+	t->add(keys[indiceMedio]);
+	construir(t, keys, p, indiceMedio-1); // Criando a subárvore esquerda
+	construir(t, keys, indiceMedio+1, q); // Criando a subárvore direita
+}
+
+avl_tree *avl_tree::mergeTrees(avl_tree &av1, avl_tree &av2) {
+    // Nova árvore
+    avl_tree *newTree = new avl_tree();
+
+    // Percorre as duas arvores em ordem simétrica e armazena as chaves em vetores
+    vector<int> keys1, keys2;
+    inorder(av1.root, keys1);
+    inorder(av2.root, keys2);
+    // Cria um vector ordenado com base nos dois vetores
+    vector<int> keys = vectorOrdenado(keys1, keys2);
+
+    // Chama a função construir para criar a nova árvore
+    construir(newTree, keys, 0, keys.size()-1);
+
+    return newTree;
+    
+}
+
 void avl_tree::clear() {
     root = clear(root);
 }

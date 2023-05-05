@@ -15,4 +15,4 @@ struct Node {
     }
 };
 
-#endif 
+#endif // NODE_H

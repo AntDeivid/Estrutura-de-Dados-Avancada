@@ -1,19 +1,20 @@
 #include <iostream>
 #include "node.h"
 #include "avl.h"
+#include <stack>
 using namespace std;
 
 // retorna a altura do nó.
-// se a arvore for vazia ela tem altura 0
-// caso contrario, retorna o valor que está no campo height
 int avl_tree::height(Node *node) {
     return (node == nullptr) ? 0 : node->height;
 }
 
+// retorna o balanço do nó.
 int avl_tree::balance(Node *node) {
     return height(node->right) - height(node->left);
 }
 
+// realiza uma rotação simples a direita
 Node* avl_tree::rightRotation(Node *p) {
     Node *u = p->left;
     p->left = u->right;
@@ -24,6 +25,7 @@ Node* avl_tree::rightRotation(Node *p) {
     return u;
 }
 
+// realiza uma rotação simples a esquerda
 Node* avl_tree::leftRotation(Node *p) {
     Node *u = p->right;
     p->right = u->left;
@@ -34,30 +36,50 @@ Node* avl_tree::leftRotation(Node *p) {
     return u;
 }
 
-// função pública que recebe uma chave e a insere
-// somente se ela não for repetida
-void avl_tree::add(int key) {
-    root = add(root, key);
-}
-
   // função recursiva privada que recebe uma raiz de arvore
 // e uma chave e insere a chave na tree se e somente se 
 // ela nao for repetida. Claro, tem que deixar AVL novamente
+
+// Função iterativa que recebe a raiz de uma arvore e uma chave.
+// Insere a chave na arvore se e somente se ela nao for repetida, a deixando AVL novamente
 Node* avl_tree::add(Node *p, int key) {
-    if(p == nullptr)
-        return new Node(key);
-    if(key == p->key) 
-        return p;
-    if(key < p->key)
-        p->left = add(p->left, key);
-    else 
-        p->right = add(p->right, key);
-    
-    p = fixup_node(p, key);
+
+    if (p == nullptr) { return new Node(key); }
+
+    stack <Node*> nodeStack;
+    Node *currentNode = p;
+    while (currentNode != nullptr) {
+        nodeStack.push(currentNode);
+        if (currentNode->key == key) { return p; }
+        else if (currentNode->key > key) { currentNode = currentNode->left; }
+        else { currentNode = currentNode->right; }
+    }
+
+    Node *newNode = new Node(key);
+    currentNode = nodeStack.top();
+    if (currentNode->key > key) { currentNode->left = newNode; }
+    else { currentNode->right = newNode; }
+
+    while (!nodeStack.empty()) {
+        currentNode = nodeStack.top();
+        currentNode = fixup_node(currentNode, key);
+        nodeStack.pop();
+
+        if (!nodeStack.empty()) {
+            Node *parentNode = nodeStack.top();
+            if (parentNode->left == currentNode) { parentNode->left = currentNode; }
+            else { parentNode->right = currentNode; }
+        }
+        else { p = currentNode; }
+    }
 
     return p;
 }
 
+void avl_tree::add(int key) {
+    root = add(root, key);
+}
+ 
 Node* avl_tree::fixup_node(Node *p, int key) {
     // recalcula a altura de p
     p->height = 1 + max(height(p->left),height(p->right));
